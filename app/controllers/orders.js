@@ -6,9 +6,8 @@ const Product = require('../models/product');
 exports.getAllOrders = (req, res, next) => {
     Order
     .find()
-    .select('product quantity _id')
-    // property that points to another model
-    .populate('product', 'name') 
+    .select('_id productList')
+    .populate('product') 
     .exec()
     .then(docs => {
         res.status(200).json({
@@ -16,15 +15,9 @@ exports.getAllOrders = (req, res, next) => {
             orders: docs.map(doc => {
                 return {
                     orderId: doc._id,
-                    productId: doc.product,
-                    productQty: doc.quantity,
-                    moreDetails: {
-                        type: 'GET',
-                        url: 'http://localhost:3000/orders/' + doc._id
-                    }
+                    itemList: doc.productList
                 }
-            })
-            
+            })            
         });
     })
     .catch(err => {
@@ -35,42 +28,30 @@ exports.getAllOrders = (req, res, next) => {
 }
 
 exports.createOrder = (req, res, next) => {
-    Product.findById(req.body.productId)
-    .then(item => {
-        if(!item){
-            return res.status(404).json({
-                message: 'Product not found'
-            });
-        }
-        const order = new Order({
-            _id: mongoose.Types.ObjectId(),
-            product: req.body.productId,
-            quantity: req.body.quantity
-        });        
-        return order.save();
-    })
+    const order = new Order({
+        _id: new mongoose.Types.ObjectId(),
+        productList: req.body
+    });  
+    order
+    .save()
     .then(result => {
-        console.log(result);
         res.status(200).json({            
             message: 'Order created successfully',
             newOrderDetails: {
                 newOrderId: result._id,
-                productInTheOrder: result.product,
-                productQuantity: result.quantity 
-            },
-            moreDetails: {
-                type: 'GET',
-                url: 'http://localhost:3000/orders/' + result._id
+                orderedItems: result.productList
             }
         });
-        
     })
     .catch(error => {
             res.status(200).json({
-                message: "down here",
                 error: error
             });
     });
+}
+
+exports.updateOrder = (req, res, next) => {
+    console.log("order updated...");
 }
 
 exports.getOrder = (req, res, next) => {
@@ -83,10 +64,11 @@ exports.getOrder = (req, res, next) => {
                 message: 'Order not found'
             });
         }
+        
         res.status(200).json({
-            //orderId: req.params.orderId,
-            orderDetails: order
-        })
+            orderId: order._id,
+            orderDetails: order.productList
+        });
     })
     .catch(err => {
         res.status(500).json({
@@ -105,15 +87,7 @@ exports.deleteOrder = (req, res, next) => {
             });
         }
         res.status(200).json({
-            message: 'Order deleted',
-            viewOrders: {
-                type: 'GET',
-                url: 'http://localhost:3000/orders',
-                bodyType: {
-                    productId: 'ID',
-                    quantity: 'Number'
-                }
-            }
+            message: 'Order deleted'
         });
     })
     .catch(err => {

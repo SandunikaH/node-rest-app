@@ -5,7 +5,7 @@ const Product = require('../models/product');
 exports.getAllProducts = (req, res, next) => {
     Product
     .find()
-    .select('name price _id productImage')
+    .select('name price _id')
     .exec()
     .then(docs => {
         const adjustedResponse = {
@@ -15,12 +15,7 @@ exports.getAllProducts = (req, res, next) => {
                 return {
                     productName: doc.name,
                     productPrice: doc.price,
-                    productImage: doc.productImage,
-                    productID: doc._id,
-                    moreDetails: {
-                        type: 'GET',
-                        url: 'http://localhost:3000/products/' + doc._id
-                    }
+                    productID: doc._id
                 }
             })
         };
@@ -34,29 +29,24 @@ exports.getAllProducts = (req, res, next) => {
     });
 }
 
-exports.createProduct = (req, res, next) => {
+exports.addProduct = (req, res, next) => {
     console.log(req.file);
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
-        price: req.body.price,
-        productImage: req.file.path
+        price: req.body.price
     });   
     product
     .save()
     .then(result => {
         console.log(result);
         res.status(201).json({
-            message: 'Product created successfully',
+            message: 'Product added successfully',
             //createdProduct: result
             createdProduct: {
                 productName: result.name,
                 productPrice: result.price,
-                productID: result._id,
-                moreDetails: {
-                    type: 'GET',
-                    url: 'http://localhost:3000/products/' + result._id
-                }
+                productID: result._id
             }
         });
     })
@@ -71,19 +61,14 @@ exports.createProduct = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
     const id = req.params.productId;
     Product.findById(id)
-    .select('name price _id productImage')
+    .select('name price _id')
     .exec()
     .then(doc => {
         if(doc){
             res.status(200).json({
-                basicDetails: doc,
-                moreDetails: {
-                    type: 'GET',
-                    description: 'Product details',
-                    url: 'http://localhost:3000/products'
-                }
+                productDetails: doc
             });
-        } else{
+        } else {
             res.status(404).json({message: "Product not found"});
         }
     })
@@ -102,11 +87,7 @@ exports.updateProduct = (req, res, next) => {
     .exec()
     .then(result => {
         res.status(200).json({
-            message: 'Product updated!',
-            moreDetails: {
-                type: 'GET',
-                url: 'http://localhost:3000/products/' + req.params.productId
-            }
+            message: 'Product updated!'
         });
     })
     .catch(err => {
@@ -128,19 +109,7 @@ exports.deleteProduct = (req, res, next) => {
             });
         }
         res.status(200).json({
-            message: 'Product deleted',
-            allProducts: {
-                type: 'GET',
-                url: 'http://localhost:3000/products'
-            },
-            addNewProduct: {
-                type: 'POST',
-                url: 'http://localhost:3000/products',
-                bodyType: {
-                    name: 'String',
-                    price: 'Number'
-                }
-            }
+            message: 'Product deleted'
         });
     })
     .catch(err => {
