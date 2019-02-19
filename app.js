@@ -21,14 +21,14 @@ app.use(bodyParser.json());
 
 // adjust the response
 app.use((req, res, next) => {
-    // specify which cleint requests are accepted    
-    // * = give access to any client
     res.header("Access-Control-Allow-Origin", "*");
-    // specify which headers sent along with the request
-    res.header(
-        "Aceess-Control-Allow-Headers", 
-        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-        );
+    // res.header(
+    //     "Aceess-Control-Allow-Headers",
+    //     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    //     );
+    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Authorization, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+    // res.header('Access-Control-Allow-Headers', 'Content-Type');
+    // res.header('Access-Control-Allow-Headers', 'Authorization');
     if(req.method === 'OPTIONS'){
             res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
             return res.status(200).json({});
@@ -36,12 +36,12 @@ app.use((req, res, next) => {
     next();
 });
 
-const productRoutes = require('./app/routs/products');
-const orderRoutes = require('./app/routs/orders');
-const userRoutes = require('./app/routs/users');
+const productRoutes = require('./app/routes/products');
+const orderRoutes = require('./app/routes/orders');
+const userRoutes = require('./app/routes/users');
 
 
-// any url started with /products will be directed to productRoutes located at ./app/routs/products  
+// any url started with /products will be directed to productRoutes located at ./app/routes/products
 app.use('/products', productRoutes);
 app.use('/orders', orderRoutes);
 app.use('/users', userRoutes);

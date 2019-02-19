@@ -10,4 +10,8 @@ router.post('/login', userController.login);
 
 router.delete('/:userId', checkAuth, userController.deleteUser);
 
+router.get('/validate', checkAuth, (req, res)=>{
+    res.send({success: true, email: req.userData.email});
+});
+
 module.exports = router;
