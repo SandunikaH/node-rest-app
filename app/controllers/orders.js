@@ -31,7 +31,7 @@ exports.createOrder = (req, res, next) => {
     const order = new Order({
         _id: new mongoose.Types.ObjectId(),
         productList: req.body
-    });  
+    });
     order
     .save()
     .then(result => {
@@ -64,7 +64,6 @@ exports.getOrder = (req, res, next) => {
                 message: 'Order not found'
             });
         }
-        
         res.status(200).json({
             orderId: order._id,
             orderDetails: order.productList
